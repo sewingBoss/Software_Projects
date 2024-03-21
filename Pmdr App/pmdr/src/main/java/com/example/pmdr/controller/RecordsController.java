@@ -2,13 +2,13 @@ package com.example.pmdr.controller;
 
 import com.example.pmdr.model.Records;
 import com.example.pmdr.repository.RecordsRepository;
+import com.example.pmdr.util.DateUtils;
 
 import java.util.List;
 import java.time.OffsetDateTime;
-
+import java.time.format.DateTimeParseException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -51,29 +51,55 @@ public class RecordsController {
     
     //get all records since start time
     @GetMapping("/since")
-    public List<Records> getAllSince(@RequestParam 
-                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) 
-                                    /*Needs to be in the format 2000-10-31T01:30:00.000-05:00 */
-                                     OffsetDateTime startTime) {
-    
-    List<Records> records = this.recordsRepository.findByStartTimeGreaterThanEqual(startTime);
-    return records;
+    public ResponseEntity<?> getAllSince(@RequestParam String startTime) {
+    OffsetDateTime dateTime;
+    try {
+        dateTime = DateUtils.parseDate(startTime);
+    } catch(IllegalArgumentException e) {
+        return new ResponseEntity<>("Invalid date format", HttpStatus.BAD_REQUEST);
     }
+    List<Records> records = this.recordsRepository.findByStartTimeGreaterThanEqual(dateTime);
+    if(records.isEmpty()){
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } else {
+        return new ResponseEntity<>(records, HttpStatus.OK);
+        }
+   
+    }
+    
 
     //get all records before end time
     @GetMapping("/before")
-    public List<Records> getAllBefore(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endTime) {
-        List<Records> records = this.recordsRepository.findByEndTimeLessThanEqual(endTime);
-        return records;
-    }
+    public ResponseEntity<?> getAllBefore(@RequestParam String endTime) {
+        OffsetDateTime dateTime;
+        try {
+            dateTime = DateUtils.parseDate(endTime);
+        } catch(DateTimeParseException e) {
+            return new ResponseEntity<>("Invalid date format", HttpStatus.BAD_REQUEST);
+        }
+        List<Records> records = this.recordsRepository.findByEndTimeLessThanEqual(dateTime);
+        if(records.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(records, HttpStatus.OK);
+            }
+       
+        }
+    
 
     //get all records based on search input
     @GetMapping("/search")
-    public ResponseEntity<List<Records>> getAllSearch(@RequestParam(required = false) String task,
-                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startTime,
-                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endTime,
-                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime sinceTime,
-                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime beforeTime) {
+    public ResponseEntity<?> getAllSearch(@RequestParam(required = false) String task,
+                                     @RequestParam(required = false) String startTimeStr,
+                                     @RequestParam(required = false) String endTimeStr,
+                                     @RequestParam(required = false) String sinceTimeStr,
+                                     @RequestParam(required = false) String beforeTimeStr) {
+        try {
+            OffsetDateTime startTime = startTimeStr != null ? DateUtils.parseDate(startTimeStr) : null;
+            OffsetDateTime endTime = endTimeStr != null ? DateUtils.parseDate(endTimeStr) : null;
+            OffsetDateTime sinceTime = sinceTimeStr != null ? DateUtils.parseDate(sinceTimeStr) : null;
+            OffsetDateTime beforeTime = beforeTimeStr != null ? DateUtils.parseDate(beforeTimeStr) : null;
+        
         List<Records> records = null;
         if (task != null && startTime != null && endTime != null) {
             records = this.recordsRepository.findByTaskAndStartTimeAndEndTime(task, startTime, endTime);
@@ -102,13 +128,13 @@ public class RecordsController {
         } else if (beforeTime != null) {
             records = this.recordsRepository.findByEndTimeLessThanEqual(beforeTime);
             return new ResponseEntity<>(records, HttpStatus.OK);
-        } 
-        
-        else {
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } 
-
+        }
+    } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+}
 
     //correct records
     @PutMapping("/fix/{id}")
