@@ -4,7 +4,6 @@ This includes anything related to software
 
 
 以下、現在自分のレベルの指標として使用できるもの  
-  ・[_Javaで画像編集_](Beginner_Stuff/Java_Stuff/二次配列画像編集)  
   ・[_ポモドーロタイマーアプリ_](Pmdr%20App)  
   
   
