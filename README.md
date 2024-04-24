@@ -4,6 +4,6 @@ This includes anything related to software
 
 
 以下、現在自分のレベルの指標として使用できるもの  
-  ・[_ポモドーロタイマーアプリ_](Pmdr%20App)  
+  ・[_ポモドーロタイマーアプリ_](Pmdr%20App)    (未完)
   
   
