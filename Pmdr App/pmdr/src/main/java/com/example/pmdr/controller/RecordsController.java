@@ -8,17 +8,17 @@ import java.util.List;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
+//NOTE: There is no service layer in this project since this file is the only controller.
 
 @RestController
 @RequestMapping("/records")
 public class RecordsController {
-    @Autowired
     public RecordsRepository recordsRepository;
     public RecordsController(RecordsRepository recordsRepository){
         this.recordsRepository = recordsRepository;

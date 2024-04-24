@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import org.springframework.data.repository.CrudRepository;
 
 public interface RecordsRepository extends CrudRepository<Records, Long>{
+//These are custom queries that jpa will interpret and define for us as long as we follow the naming convension.
     List<Records> findByTask(String task);
     List<Records> findByStartTime(OffsetDateTime startTime); 
     List<Records> findByEndTime(OffsetDateTime endTime);
